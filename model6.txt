@@ -1,0 +1,32 @@
+# Jags model file for mpios within deptos analysis based on multi-level radon model in Gelman & Hill p. 350, save to working directory for access
+model {
+	for (i in 1:N) {
+	y[i] ~ dnorm (y.hat[i], tau.y)
+	
+	y.hat[i] <- a[depto[i]] + b1*x1[i] + b2*x2[i] + b3*x3[i]				#x1 is arriving desplazados x2 is victims both scaled by censo 2005 x3 is support for uribe puppet 2014
+
+	e.y[i]<- y[i] - y.hat[i]							#data-level errors
+					}
+	
+	b1 ~dnorm (0, 0.0001)
+	b2 ~dnorm (0, 0.0001)
+	b3 ~dnorm (0, 0.0001)
+	tau.y <-pow(sigma.y, -2)			
+	sigma.y ~dunif (0, 100)						
+	
+	for (j in 1:J) {										#J = total deptos
+		a[j] ~ dnorm (a.hat[j], tau.a)
+
+		a.hat[j] <- mu.a + b4*x4[j] + b5*x5[j] + b6*x6[j]	#x4 is unemployment 2015 x5 is growth gdp 2014/2014 x6 is inflation
+
+			e.a[j] <- a[j] - a.hat[j]						#group-level errors
+					}
+
+		mu.a ~ dnorm (0, 0.0001)
+		b4 ~ dnorm (0, 0.0001)
+		b5 ~ dnorm (0, 0.0001)
+		b6 ~ dnorm (0, 0.0001)
+		tau.a <- pow(sigma.a, -2)
+		sigma.a ~ dunif (0, 100)							#one sigma for all deptos
+
+	}
